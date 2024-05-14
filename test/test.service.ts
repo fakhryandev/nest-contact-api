@@ -24,4 +24,12 @@ export class TestService {
       },
     });
   }
+
+  async getUser() {
+    return this.prismaService.user.findUnique({
+      where: {
+        username: 'test',
+      },
+    });
+  }
 }
