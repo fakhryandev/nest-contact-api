@@ -25,8 +25,28 @@ export class TestService {
     });
   }
 
+  async createContact() {
+    await this.prismaService.contact.create({
+      data: {
+        first_name: 'test',
+        last_name: 'test',
+        email: 'test@example.com',
+        phone: '12345',
+        username: 'test',
+      },
+    });
+  }
+
   async getUser() {
     return this.prismaService.user.findUnique({
+      where: {
+        username: 'test',
+      },
+    });
+  }
+
+  async getContact() {
+    return this.prismaService.contact.findFirst({
       where: {
         username: 'test',
       },
