@@ -3,7 +3,11 @@ import { Contact, User } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/common/prisma.service';
 import { ValidationService } from 'src/common/validation.service';
-import { ContactResponse, CreateContactRequest } from 'src/model/contact.model';
+import {
+  ContactResponse,
+  CreateContactRequest,
+  UpdateContactRequest,
+} from 'src/model/contact.model';
 import { Logger } from 'winston';
 import { ContactValidation } from './contact.validation';
 
@@ -34,10 +38,13 @@ export class ContactService {
     return this.toContactResponse(contact);
   }
 
-  async get(user: User, contactId: number): Promise<ContactResponse> {
+  async checkContactMustExists(
+    username: string,
+    contactId: number,
+  ): Promise<Contact> {
     const contact = await this.prismaService.contact.findFirst({
       where: {
-        username: user.username,
+        username: username,
         id: contactId,
       },
     });
@@ -45,6 +52,39 @@ export class ContactService {
     if (!contact) {
       throw new HttpException('Contact is not found', 404);
     }
+
+    return contact;
+  }
+
+  async get(user: User, contactId: number): Promise<ContactResponse> {
+    const contact: Contact = await this.checkContactMustExists(
+      user.username,
+      contactId,
+    );
+
+    return this.toContactResponse(contact);
+  }
+
+  async update(
+    user: User,
+    request: UpdateContactRequest,
+  ): Promise<ContactResponse> {
+    const updateRequest: UpdateContactRequest = this.validationService.validate(
+      ContactValidation.UPDATE,
+      request,
+    );
+    let contact: Contact = await this.checkContactMustExists(
+      user.username,
+      updateRequest.id,
+    );
+
+    contact = await this.prismaService.contact.update({
+      where: {
+        id: contact.id,
+        username: user.username,
+      },
+      data: updateRequest,
+    });
 
     return this.toContactResponse(contact);
   }
