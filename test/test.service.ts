@@ -14,6 +14,12 @@ export class TestService {
     });
   }
 
+  async deleteAll() {
+    await this.deleteAddress();
+    await this.deleteContact();
+    await this.deleteUser();
+  }
+
   async createUser() {
     await this.prismaService.user.create({
       data: {
