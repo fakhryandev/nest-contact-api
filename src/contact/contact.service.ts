@@ -51,9 +51,7 @@ export class ContactService {
       },
     });
 
-    if (!contact) {
-      throw new HttpException('Contact is not found', 404);
-    }
+    if (!contact) throw new HttpException('Contact is not found', 404);
 
     return contact;
   }
