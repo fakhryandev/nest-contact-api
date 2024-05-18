@@ -215,4 +215,127 @@ describe('ContactController', () => {
       expect(response.body.data).toBe(true);
     });
   });
+
+  describe('GET /api/contacts', () => {
+    beforeEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+
+      await testService.createUser();
+      await testService.createContact();
+    });
+
+    it('should be able to search contacts', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it('should be able to search contacts by name', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({
+          name: 'es',
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it('should be able to search contacts by name not found', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({
+          name: 'rong',
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it('should be able to search contacts by email', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({
+          email: 'te',
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it('should be able to search contacts by email not found', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({
+          email: 'rong',
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it('should be able to search contacts by phone', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({
+          phone: '123',
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it('should be able to search contacts by phone not found', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/contacts')
+        .query({
+          phone: '6666',
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it('should be able to search contacts with pages', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .query({
+          size: 1,
+          page: 2,
+        })
+        .set('Authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+      expect(response.body.paging.current_page).toBe(2);
+      expect(response.body.paging.total_pages).toBe(1);
+      expect(response.body.paging.size).toBe(1);
+    });
+  });
 });
